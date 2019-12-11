@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:carros/pages/carro/carro.dart';
 import 'package:carros/pages/carro/carro_page.dart';
+import 'package:carros/pages/carro/carros_bloc.dart';
 import 'package:carros/utils/nav.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,11 @@ class CarrosListView extends StatefulWidget {
 class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveClientMixin<CarrosListView> {
 
   List<Carro> carros;
-  final _streamController = StreamController<List<Carro>>();
+
+  // Criando uma varável para substituir a sintaxe "widget.tipo"
+  String get tipo => widget.tipo;
+
+  final _bloc = CarrosBloc();
 
   // método "wantKeepAlive" do AutomaticKeepAliveClientMixin | precisa ser true
   @override
@@ -30,12 +35,7 @@ class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveC
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  _loadData() async {
-    List<Carro> carros = await CarrosApi.getCarros(widget.tipo);
-    _streamController.add(carros);
+    _bloc.fetch(tipo);
   }
 
   @override
@@ -49,7 +49,7 @@ class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveC
     // StreamBuilder funciona como um observable
     return StreamBuilder(
       // conectando ao _streamController para fazer um observable
-      stream: _streamController.stream,
+      stream: _bloc.stream,
       builder: (context, snapshot) {
         //mostrando erro de carregamento da lista de carros
         if (snapshot.hasError) {
@@ -139,5 +139,11 @@ class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveC
 
   _onClickCarro(Carro c) {
     push(context, CarroPage(c));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bloc.dispose();
   }
 }

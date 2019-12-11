@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:carros/pages/api_response.dart';
 import 'package:carros/pages/carro/home_page.dart';
 import 'package:carros/pages/login/login_api.dart';
+import 'package:carros/pages/login/login_bloc.dart';
 import 'package:carros/pages/login/usuario.dart';
 import 'package:carros/utils/alert.dart';
 import 'package:carros/utils/nav.dart';
@@ -22,9 +23,10 @@ class _LoginPageState extends State<LoginPage> {
 
   final _formKey = GlobalKey<FormState>();
 
+  final _bloc = LoginBloc();
+
   final _focusSenha = FocusNode();
 
-  final _streamController = StreamController<bool>();
 
   @override
   void initState() {
@@ -82,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             StreamBuilder<bool>(
                 // conectando ao _streamController para fazer um observable
-                stream: _streamController.stream,
+                stream: _bloc.stream,
                 builder: (context, snapshot) {
                   return AppButton(
                     "Login",
@@ -106,10 +108,7 @@ class _LoginPageState extends State<LoginPage> {
 
     print("Login: $login, Senha: $senha");
 
-    // passando o valor "true" para o StreamBuilder
-    _streamController.add(true);
-
-    ApiResponse response = await LoginApi.login(login, senha);
+    ApiResponse response = await _bloc.login(login, senha);
 
     if (response.ok) {
       Usuario user = response.result;
@@ -119,8 +118,6 @@ class _LoginPageState extends State<LoginPage> {
       alert(context, response.msg);
     }
 
-    // passando o valor "true" para o StreamBuilder
-    _streamController.add(false);
   }
 
   String _validateLogin(String text) {
@@ -143,9 +140,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     super.dispose();
-
-    // É necessário fechar o StreamController para liberar memória
-    _streamController.close();
+    _bloc.dispose();
   }
 }
 
