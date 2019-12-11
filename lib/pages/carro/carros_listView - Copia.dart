@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:carros/pages/carro/carro.dart';
 import 'package:carros/pages/carro/carro_page.dart';
 import 'package:carros/utils/nav.dart';
@@ -20,61 +18,39 @@ class CarrosListView extends StatefulWidget {
 class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveClientMixin<CarrosListView> {
 
   List<Carro> carros;
-  final _streamController = StreamController<List<Carro>>();
 
   // método "wantKeepAlive" do AutomaticKeepAliveClientMixin | precisa ser true
   @override
   bool get wantKeepAlive => true;
 
-  // Utilizando o initState() para fazer as requisições, assim o builder fica encarregado apenas de desenhar a tela
+  // A busca na API ficou no initState() para evitar que, após carregada, a informação não seja requisitada a cada reload,
+  // tirando isso do build (que agora pode desenhar a tela mais rapidamente).
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadingData();
   }
 
-  _loadData() async {
+  _loadingData() async {
     List<Carro> carros = await CarrosApi.getCarros(widget.tipo);
-    _streamController.add(carros);
+    setState(() {
+      this.carros = carros;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return _body();
-  }
 
-  _body() {
+    //barra de carregamento
+    if (carros == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
-    // StreamBuilder funciona como um observable
-    return StreamBuilder(
-      // conectando ao _streamController para fazer um observable
-      stream: _streamController.stream,
-      builder: (context, snapshot) {
-        //mostrando erro de carregamento da lista de carros
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Não foi possível carregar o conteúdo",
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 22,
-              ),
-            ),
-          );
-        }
+    return _listView(carros);
 
-        //barra de carregamento
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        List<Carro> carros = snapshot.data;
-        return _listView(carros);
-      },
-    );
   }
 
   Container _listView(List<Carro> carros) {

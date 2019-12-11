@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carros/pages/api_response.dart';
 import 'package:carros/pages/carro/home_page.dart';
 import 'package:carros/pages/login/login_api.dart';
@@ -22,16 +24,16 @@ class _LoginPageState extends State<LoginPage> {
 
   final _focusSenha = FocusNode();
 
-  bool _showProgress = false;
+  final _streamController = StreamController<bool>();
 
   @override
   void initState() {
     super.initState();
 
     Future<Usuario> future = Usuario.get();
-    future.then((Usuario user){
+    future.then((Usuario user) {
       // entrando automaticamente na home se o usuário estiver logado
-      if(user != null) {
+      if (user != null) {
         push(context, HomePage(), replace: true);
       }
     });
@@ -78,11 +80,17 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 20,
             ),
-            AppButton(
-              "Login",
-              onPressed: _onClickLogin,
-              showProgress: _showProgress,
-            ),
+            StreamBuilder<bool>(
+                // conectando ao _streamController para fazer um observable
+                stream: _streamController.stream,
+                builder: (context, snapshot) {
+                  return AppButton(
+                    "Login",
+                    onPressed: _onClickLogin,
+                    // "??" operador ternário (esquerda = true | direita = o que fazer se for false)
+                    showProgress: snapshot.data ?? false,
+                  );
+                }),
           ],
         ),
       ),
@@ -98,10 +106,8 @@ class _LoginPageState extends State<LoginPage> {
 
     print("Login: $login, Senha: $senha");
 
-    //chamando o _showProgress
-    setState(() {
-      _showProgress = true;
-    });
+    // passando o valor "true" para o StreamBuilder
+    _streamController.add(true);
 
     ApiResponse response = await LoginApi.login(login, senha);
 
@@ -113,10 +119,8 @@ class _LoginPageState extends State<LoginPage> {
       alert(context, response.msg);
     }
 
-    //chamando o _showProgress
-    setState(() {
-      _showProgress = false;
-    });
+    // passando o valor "true" para o StreamBuilder
+    _streamController.add(false);
   }
 
   String _validateLogin(String text) {
@@ -125,14 +129,24 @@ class _LoginPageState extends State<LoginPage> {
     }
     return null;
   }
+
+  String _validateSenha(String text) {
+    if (text.isEmpty) {
+      return "Digite a senha";
+    }
+    if (text.length < 3) {
+      return "A senha precisa ter pelo menos 3 números";
+    }
+    return null;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    // É necessário fechar o StreamController para liberar memória
+    _streamController.close();
+  }
 }
 
-String _validateSenha(String text) {
-  if (text.isEmpty) {
-    return "Digite a senha";
-  }
-  if (text.length < 3) {
-    return "A senha precisa ter pelo menos 3 números";
-  }
-  return null;
-}
+
