@@ -9,7 +9,7 @@ class LoginBloc {
 
   final _streamController = StreamController<bool>();
 
-  get buttonStream => _streamController.stream;
+  get stream => _streamController.stream;
   Future<ApiResponse<Usuario>> login(String login, String senha) async {
 
     // passando o valor "true" para o StreamBuilder
