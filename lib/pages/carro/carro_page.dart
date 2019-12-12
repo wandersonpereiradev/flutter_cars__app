@@ -1,3 +1,4 @@
+import 'package:carros/widgets/text.dart';
 import 'package:flutter/material.dart';
 
 import 'carro.dart';
@@ -50,7 +51,50 @@ class CarroPage extends StatelessWidget {
   _body() {
     return Container(
       padding: EdgeInsets.all(16),
-      child: Image.network(carro.urlFoto),
+      child: ListView(
+        children: <Widget>[
+          Image.network(carro.urlFoto),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // usando o "text" que está na pasta widgets
+                  text(
+                    carro.nome,
+                    fontSize: 20,
+                    bold: true,
+                  ),
+                  text(
+                    carro.tipo,
+                    fontSize: 16,
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                    onPressed: _onClickFavorito,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.share,
+                      size: 40,
+                    ),
+                    onPressed: _onClickShare,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -60,7 +104,7 @@ class CarroPage extends StatelessWidget {
 
   // Tratando os dados do menu Popup
   _onClickPopupMenu(String value) {
-    switch(value) {
+    switch (value) {
       case "Editar":
         print("Editar.");
         break;
@@ -72,4 +116,8 @@ class CarroPage extends StatelessWidget {
         break;
     }
   }
+
+  void _onClickFavorito() {}
+
+  void _onClickShare() {}
 }
