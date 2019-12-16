@@ -1,76 +1,19 @@
-import 'dart:async';
 
 import 'package:carros/pages/carro/carro.dart';
-import 'package:carros/pages/carro/carro_page.dart';
-import 'package:carros/pages/carro/carros_bloc.dart';
+import 'package:carros/pages/carro/carro_page.dart' show CarroPage;
 import 'package:carros/utils/nav.dart';
-import 'package:carros/widgets/text_error.dart';
 import 'package:flutter/material.dart';
 
-import 'carros_api.dart';
 
-class CarrosListView extends StatefulWidget {
-  String tipo;
-
-  CarrosListView(this.tipo);
-
-  @override
-  _CarrosListViewState createState() => _CarrosListViewState();
-}
-
-//AutomaticKeepAliveClientMixin -> mantém a lista de carros em memória
-class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveClientMixin<CarrosListView> {
+// ignore: must_be_immutable
+class CarrosListView extends StatelessWidget {
 
   List<Carro> carros;
 
-  // Criando uma varável para substituir a sintaxe "widget.tipo"
-  String get tipo => widget.tipo;
-
-  final _bloc = CarrosBloc();
-
-  // método "wantKeepAlive" do AutomaticKeepAliveClientMixin | precisa ser true
-  @override
-  bool get wantKeepAlive => true;
-
-  // Utilizando o initState() para fazer as requisições, assim o builder fica encarregado apenas de desenhar a tela
-  @override
-  void initState() {
-    super.initState();
-    _bloc.fetch(tipo);
-  }
+  CarrosListView(this.carros);
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    return _body();
-  }
-
-  _body() {
-
-    // StreamBuilder funciona como um observable
-    return StreamBuilder(
-      // conectando ao _streamController para fazer um observable
-      stream: _bloc.stream,
-      builder: (context, snapshot) {
-        //mostrando erro de carregamento da lista de carros
-        if (snapshot.hasError) {
-          return TextError("Não foi possível carregar o conteúdo");
-        }
-
-        //barra de carregamento
-        if (!snapshot.hasData) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        List<Carro> carros = snapshot.data;
-        return _listView(carros);
-      },
-    );
-  }
-
-  Container _listView(List<Carro> carros) {
     return Container(
       padding: EdgeInsets.all(16),
       child: ListView.builder(
@@ -110,7 +53,7 @@ class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveC
                       children: <Widget>[
                         FlatButton(
                           child: const Text('DETALHES'),
-                          onPressed: () => _onClickCarro(c),
+                          onPressed: () => _onClickCarro(context, c),
                         ),
                         FlatButton(
                           child: const Text('SHARE'),
@@ -130,13 +73,7 @@ class _CarrosListViewState extends State<CarrosListView>with AutomaticKeepAliveC
     );
   }
 
-  _onClickCarro(Carro c) {
+  _onClickCarro(context, Carro c) {
     push(context, CarroPage(c));
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _bloc.dispose();
   }
 }
