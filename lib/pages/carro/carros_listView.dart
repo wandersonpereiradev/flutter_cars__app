@@ -3,6 +3,7 @@ import 'package:carros/pages/carro/carro.dart';
 import 'package:carros/pages/carro/carro_page.dart' show CarroPage;
 import 'package:carros/utils/nav.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 
 // ignore: must_be_immutable
@@ -27,7 +28,8 @@ class CarrosListView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Center(
-                    child: Image.network(
+                    child: CachedNetworkImage(
+                      imageUrl:
                       // Se a foto não existir, irá utilizar a imagem da url passa depois dos "??"
                       c.urlFoto ??
                           "https://images-na.ssl-images-amazon.com/images/I/51oWFC9vf8L._SX425_.jpg",

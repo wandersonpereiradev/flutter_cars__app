@@ -28,11 +28,7 @@ class CarrosApi {
     try {
       List list = convert.json.decode(json);
       // Usando a função map() para percorrer a lista de carros
-      List<Carro> carros = list.map((map) => Carro.fromJson(map)).toList();
-
-      // Criando uma instância de CarroDao() e salvando no DB
-      final dao = CarroDAO();
-      carros.forEach(dao.save);
+      List<Carro> carros = list.map((map) => Carro.fromMap(map)).toList();
 
       return carros;
     } catch(error, exception) {
