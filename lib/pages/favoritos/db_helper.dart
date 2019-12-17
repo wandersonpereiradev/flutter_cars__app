@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -25,21 +26,29 @@ class DatabaseHelper {
     String path = join(databasesPath, 'carros.db');
     print("db $path");
 
-    var db = await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    var db = await openDatabase(path, version: 1, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return db;
   }
 
   void _onCreate(Database db, int newVersion) async {
-    await db.execute(
-        'CREATE TABLE carro(id INTEGER PRIMARY KEY, tipo TEXT, nome TEXT'
-        ', descricao TEXT, urlFoto TEXT, urlVideo TEXT, latitude TEXT, longitude TEXT)');
+    String s = await rootBundle.loadString("assets/sql/create.sql");
+    //Split para adicionar ";" no final de cada linha do comando SQL
+    List<String> sqls = s.split(";");
+    //Percorrendo a lista para executar os comandos SQL
+    for (String sql in sqls) {
+      //Ignorando linhas vazias entre as linhas com comandos SQL
+      if (sql.trim().isNotEmpty) {
+        print("SQL: $sql");
+        await db.execute(sql);
+      }
+    }
   }
 
   Future<FutureOr<void>> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     print("_onUpgrade: oldVersion: $oldVersion > newVersion: $newVersion");
 
     if(oldVersion == 1 && newVersion == 2) {
-      await db.execute("alter table carro add column NOVA TEXT");
+      //await db.execute("alter table carro add column NOVA TEXT");
     }
   }
 
